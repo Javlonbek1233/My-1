@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Memory": {
+      "title": "Memory",
+      "description": "A digital memory capsule or future message",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "video", "audio", "letter"] },
+        "unlockDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isLocked": { "type": "boolean" },
+        "emotion": { "type": "string" },
+        "aiCaption": { "type": "string" },
+        "aiSummary": { "type": "string" },
+        "familySharedWith": { "type": "array" }
+      },
+      "required": ["ownerId", "title", "type", "unlockDate", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/memories/{memoryId}": {
+      "schema": "Memory",
+      "description": "Digital memory capsules"
+    }
+  }
+}

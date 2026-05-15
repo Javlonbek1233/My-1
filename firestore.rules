@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Primitive Definition Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isMemoryOwner(memoryId) {
+      return isOwner(get(/databases/$(database)/documents/memories/$(memoryId)).data.ownerId);
+    }
+    function isVerified() { return request.auth.token.email_verified == true; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // 2. User Profiles
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.uid == request.auth.uid &&
+               data.email is string && data.email.size() <= 256 &&
+               (data.displayName == null || (data.displayName is string && data.displayName.size() <= 100)) &&
+               (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 512));
+      }
+
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL']);
+    }
+
+    // 3. Memory Capsules
+    match /memories/{memoryId} {
+      function isValidMemory(data) {
+        return data.ownerId == request.auth.uid &&
+               data.title is string && data.title.size() <= 200 &&
+               data.type in ['text', 'video', 'audio', 'letter'] &&
+               data.unlockDate is timestamp &&
+               (data.content == null || (data.content is string && data.content.size() <= 1000000)) && // 1MB limit for text/base64
+               (data.emotion == null || (data.emotion is string && data.emotion.size() <= 50)) &&
+               (data.aiCaption == null || (data.aiCaption is string && data.aiCaption.size() <= 500)) &&
+               (data.aiSummary == null || (data.aiSummary is string && data.aiSummary.size() <= 2000));
+      }
+
+      // Read access: owner can always read. Others can read if shared (simplified here for first pass)
+      allow get: if isOwner(resource.data.ownerId);
+      allow list: if isSignedIn() && (resource.data.ownerId == request.auth.uid || request.auth.uid in resource.data.familySharedWith);
+      
+      allow create: if isSignedIn() && isValidMemory(incoming()) && incoming().createdAt == request.time && incoming().isLocked == true;
+      
+      allow update: if isOwner(resource.data.ownerId) && isValidMemory(incoming()) && (
+        // Action: Update AI content or sharing
+        incoming().diff(existing()).affectedKeys().hasOnly(['emotion', 'aiCaption', 'aiSummary', 'familySharedWith']) ||
+        // Action: Unlock (when date passed)
+        (incoming().diff(existing()).affectedKeys().hasOnly(['isLocked']) && request.time >= resource.data.unlockDate)
+      );
+      
+      allow delete: if isOwner(resource.data.ownerId);
+    }
+  }
+}

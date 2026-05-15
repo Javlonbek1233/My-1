@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-display: "Space Grotesk", sans-serif;
+}
+
+:root {
+  --color-bg: #0A0806;
+  --color-text: #D4CFC9;
+  --color-accent: #FF4E00;
+  --glass-surface: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+@layer base {
+  button {
+    @apply cursor-pointer transition-all duration-300;
+  }
+}
+
+/* Editorial Atmosphere */
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-bg);
+  overflow: hidden;
+}
+
+.atmosphere-pulses {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+}
+
+.pulse-1 {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: #2A1B12;
+  border-radius: 9999px;
+  filter: blur(120px);
+}
+
+.pulse-2 {
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 800px;
+  height: 800px;
+  background: #1A1A2E;
+  border-radius: 9999px;
+  filter: blur(150px);
+}
+
+.bg-dot-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #ffffff10 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glass-card {
+  background: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 0px; /* Editorial theme uses sharp corners or minimal rounding */
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--color-text), #ffffff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.editorial-heading {
+  font-family: var(--font-serif);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+}
+
+.accent-border {
+  border-color: var(--color-accent);
+}
+
+.accent-text {
+  color: var(--color-accent);
+}
+
+.accent-bg {
+  background-color: var(--color-accent);
+}

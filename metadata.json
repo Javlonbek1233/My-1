@@ -1,0 +1,11 @@
+{
+  "name": "MemoryVault",
+  "description": "An emotional futuristic platforms for storing digital memory capsules, future messages, and AI-powered storytelling for the future.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
